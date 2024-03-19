@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Translation App</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#text').on('keyup', function(e) {
+                // Avoid translating on every keystroke for performance reasons, optional
+                if (e.key === 'Enter') {
+                    var text = $(this).val();
+                    translateText(text);
+                }
+            });
+
+            function translateText(inputText) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/translate/', // Ensure this matches the correct URL for your Django view
+                    data: {
+                        'text': inputText,
+                        'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+                    },
+                    success: function(response) {
+                        console.log(response); // Check the structure of the response
+                        $('#translated-text').text(response.translated_text);
+                    },
+                    error: function(xhr, status, error) {
+                        console.log("Error: " + error);
+                        $('#translated-text').text("Translation failed.");
+                    }
+                });
+            }
+        });
+    </script>
+</head>
+<body>
+    <h2>Translation App</h2>
+    <form id="translate-form" method="post">
+        {% csrf_token %}
+        <label for="text">Enter text to translate:</label><br>
+        <textarea id="text" name="text" rows="4" cols="50"></textarea><br>
+    </form>
+    <div id="translated-text">Translation results will appear here</div>
+</body>
+</html>
